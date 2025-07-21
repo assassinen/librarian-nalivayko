@@ -7,28 +7,22 @@ class Token(BaseModel):
     token_type: str
 
 
-class STaskId(BaseModel):
-    id: int
-
-
-class STaskAdd(BaseModel):
-    name: str
-    description: str | None = None
-
-
-class STask(STaskAdd):
-    id: int
-    model_config = ConfigDict(from_attributes=True)
-
-
 class SUserLogin(BaseModel):
     email: str
     password: str
 
 
-class SUserAdd(SUserLogin):
+class SUserName(BaseModel):
     first_name: str
     last_name: str | None = None
+
+
+class SUserAdd(SUserName, SUserLogin):
+    pass
+
+
+class SReaderAdd(SUserName):
+    email: str
 
 
 class SUser(BaseModel):
@@ -37,3 +31,9 @@ class SUser(BaseModel):
     last_name: str | None = None
     email: str
     model_config = ConfigDict(from_attributes=True)
+
+
+class SUserSkopes(BaseModel):
+    email: str
+    is_librarian: bool | None = None
+    is_admin: bool | None = None

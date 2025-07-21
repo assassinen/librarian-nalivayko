@@ -1,11 +1,11 @@
 from uuid import UUID, uuid4
 
-from sqlalchemy import text
+from sqlalchemy import text, update
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.future import select
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-
+# from sqlalchemy.orm.sync import update
 
 engine = create_async_engine("sqlite+aiosqlite:///library.db")
 new_session = async_sessionmaker(engine, expire_on_commit=False)
@@ -50,12 +50,19 @@ class Base(DeclarativeBase):
                 return new_instance
 
 
-class TaskOrm(Base):
-     __tablename__ = "tasks"
-     id: Mapped[int] = mapped_column(primary_key=True)
-     name: Mapped[str]
-     description: Mapped[str | None]
-
+    @classmethod
+    async def edit_by_uuid(cls, **values):
+        async with new_session() as session:
+            async with session.begin():
+                uuid = values.pop('uuid', '')
+                query = update(cls).where(cls.uuid == uuid).values(**values)
+                result = await session.execute(query)
+                try:
+                    await session.commit()
+                except SQLAlchemyError as e:
+                    await session.rollback()
+                    raise e
+                return result.rowcount
 
 class User(Base):
     __tablename__ = "users"
@@ -79,9 +86,9 @@ class User(Base):
 
 async def create_tables():
      async with engine.begin() as conn:
-          await conn.run_sync(Base.metadata.create_all)
+         await conn.run_sync(Base.metadata.create_all)
 
 
 async def delete_tables():
      async with engine.begin() as conn:
-          await conn.run_sync(Base.metadata.drop_all)
+         await conn.run_sync(Base.metadata.drop_all)

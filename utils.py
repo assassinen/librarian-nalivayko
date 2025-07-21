@@ -68,7 +68,7 @@ async def get_current_user(authorization: HTTPAuthorizationCredentials = Depends
 async def register_admin(email, password):
     user = await User.find_one_or_none(email=email)
     if user:
-        print('Админ уже существует')
+        return user
     user_dict = {'email': email,
                  'is_admin': True,
                  'first_name': 'Администратор',

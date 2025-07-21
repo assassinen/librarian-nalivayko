@@ -14,9 +14,9 @@ async def lifespan(app: FastAPI):
     email = 'admin'
     password = 'admin'
     admin = await register_admin(email, password)
-    print(f"Cоздан админ {admin.email}/{password}")
+    print(f"Админ: {admin.email}/{password}")
     yield
-    await delete_tables()
+    # await delete_tables()
     print("База очищена")
 
 app = FastAPI(lifespan=lifespan)
